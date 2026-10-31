@@ -19,6 +19,8 @@ namespace FaceOff
     {
         public ServiceInfo Driver;
         public ServiceInfo Service;
+        /// <summary>The anti-cheat tray client (a process, not a service). Shown, never part of State.</summary>
+        public ServiceInfo Client;
 
         public AntiCheatState State
         {
@@ -53,6 +55,7 @@ namespace FaceOff
         {
             Driver = ServiceControl.Query(Targets.Driver),
             Service = ServiceControl.Query(Targets.Service),
+            Client = AntiCheatClient.Query(),
         };
 
         public Result Disable(bool keepApp)

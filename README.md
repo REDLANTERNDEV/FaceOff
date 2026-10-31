@@ -12,7 +12,8 @@ FACEIT's tray icon can unload the driver, but it [loads again on the next boot](
 
 - **Turn off:** closes the anti-cheat tray client (same as **Exit** in its tray menu) and the FACEIT app, then sets the driver and service to `Disabled` and stops them. Windows usually won't unload the driver while it's running, so FaceOff tells you when a restart is needed. Tick **Keep the FACEIT app open** if you only want the anti-cheat off.
 - **Turn on:** restores the start types FACEIT had before (saved the first time you turn it off). FACEIT only accepts a driver that loaded while Windows started, so you restart once before playing. FACEIT's own tray option works the same way.
-- **Status:** shows whether the driver is loaded and how each one starts.
+- **Open:** once FACEIT is on and the driver is loaded, opens `faceitclient.exe` with your normal user rights, not FaceOff's admin rights.
+- **Status:** shows whether the driver, service and anti-cheat client are running.
 
 What it doesn't do: it doesn't delete or modify any FACEIT file, it makes no network connections, and it adds nothing that runs at startup. All it changes is two service start types.
 
@@ -29,7 +30,7 @@ What it doesn't do: it doesn't delete or modify any FACEIT file, it makes no net
 
 ## Usage
 
-Double-click `FaceOff.exe` and press **TURN OFF** / **TURN ON**.
+Double-click `FaceOff.exe` and press **TURN OFF** / **TURN ON**. After the restart, **Open anti-cheat** under the main button starts the FACEIT anti-cheat client.
 
 Command line (run from an elevated terminal):
 

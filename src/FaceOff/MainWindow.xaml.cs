@@ -71,6 +71,13 @@ namespace FaceOff
                 Row("Service", status.Service),
             };
 
+            var client = status.Client;
+            ClientText.Text = !client.Installed ? "Not installed" : client.Running ? "Running" : "Stopped";
+            ClientDot.Fill = (Brush)FindResource(!client.Installed ? "Muted" : client.Running ? "Accent" : "Ok");
+            OpenButton.Visibility = _state == AntiCheatState.On && client.Installed ? Visibility.Visible : Visibility.Collapsed;
+            OpenButton.IsEnabled = !client.Running;
+            OpenButton.Content = client.Running ? "Anti-cheat is running" : "Open anti-cheat";
+
             // The banner follows the real driver state, so it's still there after reopening FaceOff.
             if (_state == AntiCheatState.OnAfterRestart) RestartText.Text = "Restart to play. FACEIT loads during startup.";
             if (_state == AntiCheatState.OffAfterRestart) RestartText.Text = "Restart to finish turning off.";
@@ -102,6 +109,22 @@ namespace FaceOff
             ToggleText.Text = text;
             ToggleButton.Style = (Style)FindResource(primary ? "PrimaryButton" : "OutlineButton");
             ToggleButton.IsEnabled = true;
+        }
+
+        async void Open_Click(object sender, RoutedEventArgs e)
+        {
+            ErrorText.Visibility = Visibility.Collapsed;
+            OpenButton.IsEnabled = false;
+            try
+            {
+                AntiCheatClient.Open();
+                await Task.Delay(TimeSpan.FromSeconds(3)); // give it a moment to show up in the rows
+            }
+            catch (Exception ex) { ShowError(ex.Message); }
+            finally
+            {
+                await RefreshAsync();
+            }
         }
 
         async void Toggle_Click(object sender, RoutedEventArgs e)

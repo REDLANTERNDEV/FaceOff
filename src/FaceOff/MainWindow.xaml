@@ -100,6 +100,19 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <!-- Anti-cheat client: a process, not a service -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Client" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Ellipse x:Name="ClientDot" Width="6" Height="6" VerticalAlignment="Center" />
+                            <TextBlock x:Name="ClientText" Margin="7,0,0,0" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -119,11 +132,9 @@
                 </StackPanel>
             </Button>
 
-            <!-- Setting, always visible: turning off closes everything FACEIT unless the user keeps the app -->
-            <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="2,12,0,0"
-                      Checked="KeepApp_Changed" Unchecked="KeepApp_Changed">
-                <TextBlock Text="Keep FACEIT app open" Foreground="{StaticResource Muted}" />
-            </CheckBox>
+            <!-- Secondary action, only once the driver is loaded -->
+            <Button x:Name="OpenButton" Margin="0,8,0,0" Style="{StaticResource SubtleButton}"
+                    Content="Open anti-cheat" Click="Open_Click" Visibility="Collapsed" />
 
             <TextBlock x:Name="ErrorText" Margin="0,10,0,0" Foreground="{StaticResource Danger}" TextWrapping="Wrap"
                        FontSize="12" Visibility="Collapsed" />
@@ -137,6 +148,14 @@
                 <TextBlock x:Name="DetailsText" FontFamily="{StaticResource MonoFont}" FontSize="11"
                            Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
             </Border>
+
+            <!-- Settings live apart from the actions -->
+            <Border Height="1" Background="{StaticResource Line}" Margin="0,18,0,14" />
+            <TextBlock Style="{StaticResource Label}" Text="SETTINGS" />
+            <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="0,10,0,0"
+                      Checked="KeepApp_Changed" Unchecked="KeepApp_Changed">
+                <TextBlock Text="Keep FACEIT app open when turning off" Foreground="{StaticResource Muted}" />
+            </CheckBox>
 
         </StackPanel>
     </Grid>
