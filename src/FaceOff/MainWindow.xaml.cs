@@ -43,78 +43,52 @@ namespace FaceOff
             switch (_state)
             {
                 case AntiCheatState.On:
-                    SetPill("ON", (Color)FindResource("AccentColor"));
-                    Headline.Text = "FACEIT is enabled";
-                    Subline.Text = "The kernel driver can load with Windows. Turn it off when you're done playing.";
+                    SetHeadline("ON", "AccentColor");
                     SetToggle("TURN OFF", primary: true);
                     break;
                 case AntiCheatState.OffAfterRestart:
-                    SetPill("OFF AFTER RESTART", (Color)FindResource("WarnColor"));
-                    Headline.Text = "Disabled, still loaded";
-                    Subline.Text = "FACEIT won't start again, but the driver stays in memory until Windows restarts.";
+                    SetHeadline("OFF", "WarnColor");
                     SetToggle("TURN ON", primary: false);
                     break;
                 case AntiCheatState.Off:
-                    SetPill("OFF", (Color)FindResource("OkColor"));
-                    Headline.Text = "FACEIT is off";
-                    Subline.Text = "Nothing from FACEIT loads at boot. Turn it on before you play.";
+                    SetHeadline("OFF", "OkColor");
                     SetToggle("TURN ON", primary: false);
                     break;
                 default:
-                    SetPill("NOT FOUND", (Color)FindResource("MutedColor"));
-                    Headline.Text = "FACEIT not found";
-                    Subline.Text = "The FACEIT anti-cheat driver and service aren't installed on this PC.";
-                    SetToggle("NOTHING TO DO", primary: true);
+                    SetHeadline("NOT FOUND", "MutedColor");
+                    SetToggle("TURN OFF", primary: true);
                     ToggleButton.IsEnabled = false;
                     break;
             }
 
-            KeepAppCheck.Visibility = _state == AntiCheatState.On ? Visibility.Visible : Visibility.Collapsed;
-
             TargetRows.ItemsSource = new[]
             {
-                Row("Kernel driver", status.Driver, "FACEIT_AC.sys"),
-                Row("Anti-cheat service", status.Service, Targets.Service),
+                Row("Driver", status.Driver),
+                Row("Service", status.Service),
             };
 
             bool pendingRestart = _state == AntiCheatState.OffAfterRestart;
-            if (pendingRestart) RestartText.Text = "Driver is still loaded. Restart Windows to unload it.";
+            if (pendingRestart) RestartText.Text = "Restart to finish turning off.";
             RestartBanner.Visibility = pendingRestart || RestartBanner.Tag != null ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        object Row(string title, ServiceInfo s, string displayName)
+        object Row(string title, ServiceInfo s)
         {
             if (!s.Installed)
-                return new { Title = title, Name = displayName, RunState = "Not installed", StartText = "", DotBrush = FindResource("Muted") };
+                return new { Title = title, RunState = "Not installed", DotBrush = FindResource("Muted") };
             return new
             {
                 Title = title,
-                Name = displayName,
                 RunState = s.Running ? "Running" : "Stopped",
-                StartText = "Start: " + Friendly(s.StartType),
                 DotBrush = FindResource(s.Running ? "Accent" : "Ok"),
             };
         }
 
-        static string Friendly(StartType t)
+        void SetHeadline(string text, string colorKey)
         {
-            switch (t)
-            {
-                case StartType.Boot: return "Boot";
-                case StartType.System: return "With Windows";
-                case StartType.Auto: return "Automatic";
-                case StartType.Demand: return "Manual";
-                default: return "Disabled";
-            }
-        }
-
-        void SetPill(string text, Color color)
-        {
-            PillText.Text = text;
-            var fade = TimeSpan.FromMilliseconds(200);
-            PillDot.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(color, fade));
-            PillFg.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(color, fade));
-            PillBg.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(Color.FromArgb(0x26, color.R, color.G, color.B), fade));
+            Headline.Text = text;
+            var color = (Color)FindResource(colorKey);
+            HeadlineFg.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(color, TimeSpan.FromMilliseconds(200)));
         }
 
         void SetToggle(string text, bool primary)
@@ -138,7 +112,7 @@ namespace FaceOff
 
                 // Enable can also need a restart (driver that loads at boot); keep the banner up for that case.
                 RestartBanner.Tag = !turningOff && result.RebootRequired ? (object)true : null;
-                if (RestartBanner.Tag != null) RestartText.Text = "FACEIT's driver loads at boot. Restart Windows before you play.";
+                if (RestartBanner.Tag != null) RestartText.Text = "Restart before you play.";
             }
             catch (Exception ex)
             {
@@ -176,7 +150,7 @@ namespace FaceOff
             if (!_restartArmed)
             {
                 _restartArmed = true;
-                RestartButton.Content = "CLICK AGAIN TO RESTART";
+                RestartButton.Content = "CLICK TO CONFIRM";
                 _disarmTimer.Start();
                 return;
             }
@@ -194,7 +168,7 @@ namespace FaceOff
         {
             _disarmTimer.Stop();
             _restartArmed = false;
-            RestartButton.Content = "RESTART NOW";
+            RestartButton.Content = "RESTART";
         }
 
         void KeepApp_Changed(object sender, RoutedEventArgs e)
@@ -209,7 +183,7 @@ namespace FaceOff
         {
             bool show = DetailsPanel.Visibility != Visibility.Visible;
             DetailsPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            DetailsButton.Content = show ? "HIDE DETAILS" : "SHOW DETAILS";
+            DetailsButton.Content = show ? "HIDE DETAILS" : "DETAILS";
         }
 
         void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

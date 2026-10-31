@@ -48,7 +48,7 @@
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="1" Margin="20,8,20,18">
+        <StackPanel Grid.Row="1" Margin="20,8,20,20">
 
             <!-- Restart banner (FACEIT-style info strip), only when a reboot is pending -->
             <Border x:Name="RestartBanner" Background="{StaticResource Info}" CornerRadius="4" Padding="14,8,8,8"
@@ -66,39 +66,22 @@
                     <TextBlock x:Name="RestartText" Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center"
                                TextWrapping="Wrap" FontSize="12" Foreground="White" />
                     <Button x:Name="RestartButton" Grid.Column="2" Style="{StaticResource TextButton}"
-                            Content="RESTART NOW" Click="Restart_Click" />
+                            Content="RESTART" Click="Restart_Click" />
                 </Grid>
             </Border>
 
             <!-- Status card -->
             <Border Background="{StaticResource Surface}" CornerRadius="6" Padding="20,18">
                 <StackPanel>
-                    <Grid>
-                        <TextBlock Style="{StaticResource Label}" Text="ANTI-CHEAT STATUS" VerticalAlignment="Center" />
-                        <Border x:Name="Pill" HorizontalAlignment="Right" CornerRadius="10" Padding="9,3,10,3">
-                            <Border.Background>
-                                <SolidColorBrush x:Name="PillBg" Color="#26FF5500" />
-                            </Border.Background>
-                            <StackPanel Orientation="Horizontal">
-                                <Ellipse Width="7" Height="7" VerticalAlignment="Center">
-                                    <Ellipse.Fill>
-                                        <SolidColorBrush x:Name="PillDot" Color="{StaticResource AccentColor}" />
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <TextBlock x:Name="PillText" Margin="6,0,0,0" FontSize="11" FontWeight="Bold" Text="…">
-                                    <TextBlock.Foreground>
-                                        <SolidColorBrush x:Name="PillFg" Color="{StaticResource AccentColor}" />
-                                    </TextBlock.Foreground>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                    <TextBlock Style="{StaticResource Label}" Text="FACEIT ANTI-CHEAT" />
+                    <TextBlock x:Name="Headline" Margin="0,6,0,0" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="34" FontWeight="Bold" Text="…">
+                        <TextBlock.Foreground>
+                            <SolidColorBrush x:Name="HeadlineFg" Color="{StaticResource MutedColor}" />
+                        </TextBlock.Foreground>
+                    </TextBlock>
 
-                    <TextBlock x:Name="Headline" Margin="0,14,0,0" FontFamily="{StaticResource DisplayFont}"
-                               FontSize="26" FontWeight="Bold" Text="Checking…" />
-                    <TextBlock x:Name="Subline" Margin="0,4,0,0" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
-
-                    <Border Height="1" Background="{StaticResource Line}" Margin="0,18,0,14" />
+                    <Border Height="1" Background="{StaticResource Line}" Margin="0,16,0,10" />
 
                     <ItemsControl x:Name="TargetRows">
                         <ItemsControl.ItemTemplate>
@@ -108,18 +91,10 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}" FontSize="11"
-                                                   Foreground="{StaticResource Muted}" Margin="0,2,0,0" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Ellipse Width="6" Height="6" Fill="{Binding DotBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{Binding RunState}" Margin="6,0,0,0" FontWeight="SemiBold" />
-                                        </StackPanel>
-                                        <TextBlock Text="{Binding StartText}" FontSize="11" Foreground="{StaticResource Muted}"
-                                                   HorizontalAlignment="Right" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding Title}" Foreground="{StaticResource Muted}" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Ellipse Width="6" Height="6" Fill="{Binding DotBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding RunState}" Margin="7,0,0,0" FontWeight="SemiBold" />
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -144,13 +119,10 @@
                 </StackPanel>
             </Button>
 
-            <!-- Turning off closes everything FACEIT unless the user keeps the app -->
+            <!-- Setting, always visible: turning off closes everything FACEIT unless the user keeps the app -->
             <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="2,12,0,0"
-                      Checked="KeepApp_Changed" Unchecked="KeepApp_Changed" Visibility="Collapsed">
-                <TextBlock>
-                    <Run Text="Keep the FACEIT app open" />
-                    <Run Text="  (anti-cheat still turns off)" Foreground="{StaticResource Muted}" />
-                </TextBlock>
+                      Checked="KeepApp_Changed" Unchecked="KeepApp_Changed">
+                <TextBlock Text="Keep FACEIT app open" Foreground="{StaticResource Muted}" />
             </CheckBox>
 
             <TextBlock x:Name="ErrorText" Margin="0,10,0,0" Foreground="{StaticResource Danger}" TextWrapping="Wrap"
@@ -158,7 +130,7 @@
 
             <!-- What exactly happened, for people who want to verify -->
             <Button x:Name="DetailsButton" Style="{StaticResource TextButton}" Foreground="{StaticResource Muted}"
-                    HorizontalAlignment="Left" Margin="-8,10,0,0" Content="SHOW DETAILS" Click="Details_Click"
+                    HorizontalAlignment="Left" Margin="-8,10,0,0" Content="DETAILS" Click="Details_Click"
                     Visibility="Collapsed" />
             <Border x:Name="DetailsPanel" Background="{StaticResource Surface}" CornerRadius="4" Padding="12,10"
                     Margin="0,4,0,0" Visibility="Collapsed">
@@ -166,8 +138,6 @@
                            Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
             </Border>
 
-            <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" FontSize="11" Foreground="{StaticResource Muted}"
-                       Text="No network access  ·  Only changes service start types  ·  Open source" />
         </StackPanel>
     </Grid>
 </Window>

@@ -107,9 +107,10 @@ namespace FaceOff
 
                 if (ServiceControl.TryStart(s.Name, Timeout))
                     result.Log.Add($"{s.Name}: running");
-                else if (original == StartType.Boot || original == StartType.System)
+                else if (s.Name == Targets.Driver || original == StartType.Boot || original == StartType.System)
                 {
-                    result.Log.Add($"{s.Name}: loads at boot, restart to load it");
+                    // Without the driver FACEIT can't run; a restart loads it cleanly.
+                    result.Log.Add($"{s.Name}: didn't start now, restart to load it");
                     result.RebootRequired = true;
                 }
                 else
