@@ -192,7 +192,9 @@ namespace FaceOff
         {
             bool show = DetailsPanel.Visibility != Visibility.Visible;
             DetailsPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-            DetailsButton.Content = show ? "HIDE DETAILS" : "DETAILS";
+            DetailsLabel.Text = show ? "HIDE DETAILS" : "SHOW DETAILS";
+            DetailsArrowRotation.BeginAnimation(RotateTransform.AngleProperty,
+                new DoubleAnimation(show ? 90 : 0, TimeSpan.FromMilliseconds(150)));
         }
 
         void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

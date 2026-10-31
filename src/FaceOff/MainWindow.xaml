@@ -140,9 +140,20 @@
                        FontSize="12" Visibility="Collapsed" />
 
             <!-- What exactly happened, for people who want to verify -->
+            <!-- Arrow points right when closed and turns down when open -->
             <Button x:Name="DetailsButton" Style="{StaticResource TextButton}" Foreground="{StaticResource Muted}"
-                    HorizontalAlignment="Left" Margin="-8,10,0,0" Content="DETAILS" Click="Details_Click"
-                    Visibility="Collapsed" />
+                    HorizontalAlignment="Left" Margin="-8,10,0,0" Click="Details_Click" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="M0,0 L5,4 L0,8 Z" Width="5" Height="8" VerticalAlignment="Center"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform x:Name="DetailsArrowRotation" />
+                        </Path.RenderTransform>
+                    </Path>
+                    <TextBlock x:Name="DetailsLabel" Text="SHOW DETAILS" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
             <Border x:Name="DetailsPanel" Background="{StaticResource Surface}" CornerRadius="4" Padding="12,10"
                     Margin="0,4,0,0" Visibility="Collapsed">
                 <TextBlock x:Name="DetailsText" FontFamily="{StaticResource MonoFont}" FontSize="11"
@@ -150,9 +161,9 @@
             </Border>
 
             <!-- Settings live apart from the actions -->
-            <Border Height="1" Background="{StaticResource Line}" Margin="0,18,0,14" />
-            <TextBlock Style="{StaticResource Label}" Text="SETTINGS" />
-            <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="0,10,0,0"
+            <Border Height="1" Background="{StaticResource Line}" Margin="0,22,0,18" />
+            <TextBlock Style="{StaticResource Label}" Text="SETTINGS" HorizontalAlignment="Left" />
+            <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="0,14,0,2" HorizontalAlignment="Left"
                       Checked="KeepApp_Changed" Unchecked="KeepApp_Changed">
                 <TextBlock Text="Keep FACEIT app open when turning off" Foreground="{StaticResource Muted}" />
             </CheckBox>
