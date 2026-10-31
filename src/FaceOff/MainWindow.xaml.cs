@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
 
 namespace FaceOff
 {
@@ -15,8 +14,6 @@ namespace FaceOff
         readonly StateStore _store;
         readonly Toggler _toggler;
         AntiCheatState _state;
-        bool _restartArmed;
-        readonly DispatcherTimer _disarmTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
 
         public MainWindow()
         {
@@ -26,7 +23,6 @@ namespace FaceOff
             KeepAppCheck.IsChecked = _store.KeepApp;
             var v =Assembly.GetExecutingAssembly().GetName().Version;
             VersionText.Text = $"v{v.Major}.{v.Minor}";
-            _disarmTimer.Tick += (s, e) => DisarmRestart();
             SourceInitialized += (s, e) => ApplyDarkFrame();
             Loaded += async (s, e) => await RefreshAsync();
         }
@@ -169,17 +165,12 @@ namespace FaceOff
             ErrorText.Visibility = Visibility.Visible;
         }
 
-        // Two-step confirm so a stray click never reboots the PC.
+        // A plain Windows Yes/No prompt so a stray click never reboots the PC. "No" is the default.
         void Restart_Click(object sender, RoutedEventArgs e)
         {
-            if (!_restartArmed)
-            {
-                _restartArmed = true;
-                RestartButton.Content = "CLICK TO CONFIRM";
-                _disarmTimer.Start();
-                return;
-            }
-            _disarmTimer.Stop();
+            var answer = MessageBox.Show(this, "Restart Windows now?\n\nSave any open work first.", "FaceOff",
+                MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+            if (answer != MessageBoxResult.Yes) return;
             try
             {
                 Toggler.Reboot();
@@ -187,13 +178,6 @@ namespace FaceOff
                 RestartButton.IsEnabled = false;
             }
             catch (Exception ex) { ShowError(ex.Message); }
-        }
-
-        void DisarmRestart()
-        {
-            _disarmTimer.Stop();
-            _restartArmed = false;
-            RestartButton.Content = "RESTART";
         }
 
         void KeepApp_Changed(object sender, RoutedEventArgs e)
