@@ -11,7 +11,7 @@ FACEIT's tray icon can unload the driver, but it [loads again on the next boot](
 ## What FaceOff does
 
 - **Turn off:** closes the anti-cheat tray client (same as **Exit** in its tray menu) and the FACEIT app, then sets the driver and service to `Disabled` and stops them. Windows usually won't unload the driver while it's running, so FaceOff tells you when a restart is needed. Tick **Keep the FACEIT app open** if you only want the anti-cheat off.
-- **Turn on:** restores the **exact** start types FACEIT had before (saved the first time you turn it off) and starts it again.
+- **Turn on:** restores the start types FACEIT had before (saved the first time you turn it off). FACEIT only accepts a driver that loaded while Windows started, so you restart once before playing. FACEIT's own tray option works the same way.
 - **Status:** shows whether the driver is loaded and how each one starts.
 
 What it doesn't do: it doesn't delete or modify any FACEIT file, it makes no network connections, and it adds nothing that runs at startup. All it changes is two service start types.
@@ -41,21 +41,21 @@ FaceOff.exe --enable  [--reboot]
 
 `--keep-app` leaves the FACEIT app running. Exit codes: `0` ok, `1` error, `2` restart required.
 
-Typical routine: **Turn on → play → Turn off → restart.**
+Typical routine: **Turn on → restart → play → Turn off → restart.**
 
 FaceOff saves FACEIT's original start types and your settings in `FaceOff.state` next to the exe. Keep the file with the exe.
 
 ## Prefer no binary?
 
-[`scripts/faceit-off.bat`](scripts/faceit-off.bat) and [`scripts/faceit-on.bat`](scripts/faceit-on.bat) do the same thing. Run them as administrator. The one difference: `faceit-on.bat` always sets manual start instead of restoring your original setting.
+[`scripts/faceit-off.bat`](scripts/faceit-off.bat) and [`scripts/faceit-on.bat`](scripts/faceit-on.bat) do the same thing. Run them as administrator. The one difference: `faceit-on.bat` always uses FACEIT's default start types instead of the ones you saved.
 
 ## How it works
 
 | Step | Turn off | Turn on |
 |---|---|---|
-| 1 | Save the current start types | Restore the saved start type for `faceit` and start it |
-| 2 | Close `faceitclient.exe` and `FACEIT.exe` (unless you keep the app) | Restore the saved start type for `FACEITService` and start it |
-| 3 | `FACEITService` → Disabled, stop | |
+| 1 | Save the current start types | `faceit` → saved start type (loads with Windows) |
+| 2 | Close `faceitclient.exe` and `FACEIT.exe` (unless you keep the app) | `FACEITService` → saved start type (Manual) |
+| 3 | `FACEITService` → Disabled, stop | Restart, and the driver loads during startup |
 | 4 | `faceit` → Disabled, try to stop (restart if it won't) | |
 
 All logic lives in [`Toggler.cs`](src/FaceOff/Toggler.cs) and [`ServiceControl.cs`](src/FaceOff/ServiceControl.cs).

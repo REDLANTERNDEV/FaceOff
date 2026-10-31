@@ -110,6 +110,7 @@ namespace FaceOff
             {
                 case AntiCheatState.On: return "ON";
                 case AntiCheatState.Off: return "OFF";
+                case AntiCheatState.OnAfterRestart: return "ON AFTER RESTART";
                 case AntiCheatState.OffAfterRestart: return "OFF AFTER RESTART";
                 default: return "NOT INSTALLED";
             }

@@ -10,11 +10,13 @@ namespace FaceOff
         public const string Service = "FACEITService";
 
         /// <summary>
-        /// Used only when FaceOff has never seen the services enabled (e.g. first run after
-        /// the user already disabled them with a script). Manual start is what FACEIT needs
-        /// to be launchable again (FACEIT support also recommends Manual for FACEITService).
+        /// FACEIT only accepts a driver that was loaded while Windows booted, so "on" means
+        /// System start. Used when no valid original was saved (e.g. disabled earlier by a script).
         /// </summary>
-        public const StartType FallbackStartType = StartType.Demand;
+        public const StartType DriverDefault = StartType.System;
+
+        /// <summary>FACEIT support recommends Manual for FACEITService; the client starts it.</summary>
+        public const StartType ServiceDefault = StartType.Demand;
 
         /// <summary>
         /// Anti-cheat tray client (without .exe). Always closed before the services are stopped,

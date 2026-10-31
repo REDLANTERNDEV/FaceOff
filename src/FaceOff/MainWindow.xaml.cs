@@ -46,6 +46,10 @@ namespace FaceOff
                     SetHeadline("ON", "AccentColor");
                     SetToggle("TURN OFF", primary: true);
                     break;
+                case AntiCheatState.OnAfterRestart:
+                    SetHeadline("ON", "WarnColor");
+                    SetToggle("TURN OFF", primary: true);
+                    break;
                 case AntiCheatState.OffAfterRestart:
                     SetHeadline("OFF", "WarnColor");
                     SetToggle("TURN ON", primary: false);
@@ -67,9 +71,11 @@ namespace FaceOff
                 Row("Service", status.Service),
             };
 
-            bool pendingRestart = _state == AntiCheatState.OffAfterRestart;
-            if (pendingRestart) RestartText.Text = "Restart to finish turning off.";
-            RestartBanner.Visibility = pendingRestart || RestartBanner.Tag != null ? Visibility.Visible : Visibility.Collapsed;
+            // The banner follows the real driver state, so it's still there after reopening FaceOff.
+            if (_state == AntiCheatState.OnAfterRestart) RestartText.Text = "Restart to play. FACEIT loads during startup.";
+            if (_state == AntiCheatState.OffAfterRestart) RestartText.Text = "Restart to finish turning off.";
+            bool pendingRestart = _state == AntiCheatState.OnAfterRestart || _state == AntiCheatState.OffAfterRestart;
+            RestartBanner.Visibility = pendingRestart ? Visibility.Visible : Visibility.Collapsed;
         }
 
         object Row(string title, ServiceInfo s)
@@ -100,7 +106,7 @@ namespace FaceOff
 
         async void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            bool turningOff = _state == AntiCheatState.On;
+            bool turningOff = _state == AntiCheatState.On || _state == AntiCheatState.OnAfterRestart;
             bool keepApp = KeepAppCheck.IsChecked == true;
             ErrorText.Visibility = Visibility.Collapsed;
             SetBusy(true, turningOff ? "TURNING OFF" : "TURNING ON");
@@ -109,10 +115,6 @@ namespace FaceOff
                 var result = await Task.Run(() => turningOff ? _toggler.Disable(keepApp) : _toggler.Enable());
                 DetailsText.Text = string.Join(Environment.NewLine, result.Log);
                 DetailsButton.Visibility = Visibility.Visible;
-
-                // Enable can also need a restart (driver that loads at boot); keep the banner up for that case.
-                RestartBanner.Tag = !turningOff && result.RebootRequired ? (object)true : null;
-                if (RestartBanner.Tag != null) RestartText.Text = "Restart before you play.";
             }
             catch (Exception ex)
             {

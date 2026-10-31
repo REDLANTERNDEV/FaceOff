@@ -8,7 +8,9 @@ namespace FaceOff
     {
         NotInstalled,
         On,
-        /// <summary>Start types are disabled but the driver is still loaded until the next restart.</summary>
+        /// <summary>Set to load at boot, but not loaded yet: FACEIT works after the next restart.</summary>
+        OnAfterRestart,
+        /// <summary>Kept from loading at boot, but still loaded until the next restart.</summary>
         OffAfterRestart,
         Off,
     }
@@ -23,13 +25,14 @@ namespace FaceOff
             get
             {
                 if (!Driver.Installed && !Service.Installed) return AntiCheatState.NotInstalled;
-                bool disabled = IsDisabled(Driver) && IsDisabled(Service);
-                if (!disabled) return AntiCheatState.On;
+                // The driver decides: FACEIT runs only when it loads at boot.
+                if (LoadsAtBoot(Driver.StartType))
+                    return Driver.Running ? AntiCheatState.On : AntiCheatState.OnAfterRestart;
                 return Driver.Running || Service.Running ? AntiCheatState.OffAfterRestart : AntiCheatState.Off;
             }
         }
 
-        static bool IsDisabled(ServiceInfo s) => !s.Installed || s.StartType == StartType.Disabled;
+        public static bool LoadsAtBoot(StartType t) => t == StartType.Boot || t == StartType.System;
     }
 
     internal sealed class Result
@@ -41,7 +44,7 @@ namespace FaceOff
     /// <summary>The only place that changes anything. Shared by the window and the CLI.</summary>
     internal sealed class Toggler
     {
-        static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
+        static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
         readonly StateStore _store;
 
         public Toggler(StateStore store) { _store = store; }
@@ -60,8 +63,11 @@ namespace FaceOff
                 throw new InvalidOperationException("FACEIT anti-cheat is not installed.");
 
             // 1. Remember how FACEIT was configured before we touch anything.
-            foreach (var s in new[] { status.Driver, status.Service })
-                if (s.Installed) _store.Remember(s.Name, s.StartType);
+            // A driver that doesn't load at boot isn't FACEIT's own setting, so it's not worth keeping.
+            if (status.Driver.Installed && Status.LoadsAtBoot(status.Driver.StartType))
+                _store.Remember(status.Driver.Name, status.Driver.StartType);
+            if (status.Service.Installed)
+                _store.Remember(status.Service.Name, status.Service.StartType);
             _store.Save();
 
             // 2. Close the anti-cheat client first, otherwise it can restart the service.
@@ -93,28 +99,26 @@ namespace FaceOff
             if (status.State == AntiCheatState.NotInstalled)
                 throw new InvalidOperationException("FACEIT anti-cheat is not installed.");
 
-            // Driver before service, the reverse of Disable.
-            foreach (var s in new[] { status.Driver, status.Service })
+            // Only start types change here. FACEIT won't accept a driver started after boot,
+            // so the driver loads on the next restart and the client starts the service itself.
+            if (status.Driver.Installed)
             {
-                if (!s.Installed) continue;
-                if (!_store.TryGet(s.Name, out var original))
-                {
-                    original = s.StartType == StartType.Disabled ? Targets.FallbackStartType : s.StartType;
-                    result.Log.Add($"{s.Name}: no saved original, using {original}");
-                }
-                ServiceControl.SetStartType(s.Name, original);
-                result.Log.Add($"{s.Name}: start type -> {original}");
+                var driver = _store.TryGet(status.Driver.Name, out var saved) && Status.LoadsAtBoot(saved)
+                    ? saved : Targets.DriverDefault;
+                ServiceControl.SetStartType(status.Driver.Name, driver);
+                result.Log.Add($"{status.Driver.Name}: start type -> {driver}");
+            }
+            if (status.Service.Installed)
+            {
+                var service = _store.TryGet(status.Service.Name, out var saved) ? saved : Targets.ServiceDefault;
+                ServiceControl.SetStartType(status.Service.Name, service);
+                result.Log.Add($"{status.Service.Name}: start type -> {service}");
+            }
 
-                if (ServiceControl.TryStart(s.Name, Timeout))
-                    result.Log.Add($"{s.Name}: running");
-                else if (s.Name == Targets.Driver || original == StartType.Boot || original == StartType.System)
-                {
-                    // Without the driver FACEIT can't run; a restart loads it cleanly.
-                    result.Log.Add($"{s.Name}: didn't start now, restart to load it");
-                    result.RebootRequired = true;
-                }
-                else
-                    result.Log.Add($"{s.Name}: not started now, the FACEIT client will start it");
+            if (status.Driver.Installed && !status.Driver.Running)
+            {
+                result.Log.Add($"{status.Driver.Name}: loads on the next restart");
+                result.RebootRequired = true;
             }
             return result;
         }

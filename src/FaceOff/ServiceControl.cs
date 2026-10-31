@@ -85,25 +85,6 @@ namespace FaceOff
             }
         }
 
-        /// <summary>Returns true if the service is running afterwards.</summary>
-        public static bool TryStart(string name, TimeSpan timeout)
-        {
-            try
-            {
-                using (var sc = new ServiceController(name))
-                {
-                    if (sc.Status == ServiceControllerStatus.Running) return true;
-                    if (sc.Status != ServiceControllerStatus.StartPending) sc.Start();
-                    sc.WaitForStatus(ServiceControllerStatus.Running, timeout);
-                    return true;
-                }
-            }
-            catch (Exception e) when (e is InvalidOperationException || e is System.ServiceProcess.TimeoutException)
-            {
-                return false;
-            }
-        }
-
         const uint SC_MANAGER_CONNECT = 0x0001;
         const uint SERVICE_CHANGE_CONFIG = 0x0002;
         const uint SERVICE_NO_CHANGE = 0xFFFFFFFF;
