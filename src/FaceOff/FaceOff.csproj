@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>FaceOff</RootNamespace>
+    <AssemblyName>FaceOff</AssemblyName>
+    <StartupObject>FaceOff.Program</StartupObject>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\FaceOff.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>FaceOff</Product>
+    <Description>Turn FACEIT's kernel anti-cheat off when you're not playing.</Description>
+    <Copyright>Copyright (c) 2026 REDLANTERNDEV. GPL-3.0.</Copyright>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceProcess" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\FaceOff.ico" />
+  </ItemGroup>
+
+</Project>

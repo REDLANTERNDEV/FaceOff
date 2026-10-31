@@ -1,0 +1,217 @@
+<Application x:Class="FaceOff.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+
+        <!-- Palette -->
+        <Color x:Key="BgColor">#141414</Color>
+        <Color x:Key="SurfaceColor">#1E1E1E</Color>
+        <Color x:Key="RaisedColor">#262626</Color>
+        <Color x:Key="BorderColor">#2F2F2F</Color>
+        <Color x:Key="TextColor">#FFFFFF</Color>
+        <Color x:Key="MutedColor">#8A8A8A</Color>
+        <Color x:Key="AccentColor">#FF5500</Color>
+        <Color x:Key="AccentHoverColor">#FF6A1F</Color>
+        <Color x:Key="AccentPressedColor">#E04B00</Color>
+        <Color x:Key="OkColor">#32D583</Color>
+        <Color x:Key="WarnColor">#F5A524</Color>
+        <Color x:Key="InfoColor">#1E9BFF</Color>
+        <Color x:Key="DangerColor">#F04438</Color>
+
+        <SolidColorBrush x:Key="Bg" Color="{StaticResource BgColor}" />
+        <SolidColorBrush x:Key="Surface" Color="{StaticResource SurfaceColor}" />
+        <SolidColorBrush x:Key="Raised" Color="{StaticResource RaisedColor}" />
+        <SolidColorBrush x:Key="Line" Color="{StaticResource BorderColor}" />
+        <SolidColorBrush x:Key="Text" Color="{StaticResource TextColor}" />
+        <SolidColorBrush x:Key="Muted" Color="{StaticResource MutedColor}" />
+        <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}" />
+        <SolidColorBrush x:Key="Ok" Color="{StaticResource OkColor}" />
+        <SolidColorBrush x:Key="Warn" Color="{StaticResource WarnColor}" />
+        <SolidColorBrush x:Key="Info" Color="{StaticResource InfoColor}" />
+        <SolidColorBrush x:Key="Danger" Color="{StaticResource DangerColor}" />
+
+        <FontFamily x:Key="UiFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+        <FontFamily x:Key="DisplayFont">Segoe UI Variable Display, Segoe UI</FontFamily>
+        <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
+
+        <!-- Small uppercase section label, like FACEIT's "MATCHMAKING" / "SKILL LEVEL" -->
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource Muted}" />
+        </Style>
+
+        <!-- Primary action: solid orange -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Text}" />
+            <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="4" Padding="16,0">
+                            <Border.Background>
+                                <SolidColorBrush x:Name="bg" Color="{StaticResource AccentColor}" />
+                            </Border.Background>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.12" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Color" To="{StaticResource AccentHoverColor}" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Color" To="{StaticResource AccentPressedColor}" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Color" To="{StaticResource RaisedColor}" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource Muted}" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary action: orange outline, fills on hover -->
+        <Style x:Key="OutlineButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Foreground" Value="{StaticResource Accent}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="4" Padding="16,0" BorderThickness="1.5">
+                            <Border.Background>
+                                <SolidColorBrush x:Name="bg" Color="Transparent" />
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <SolidColorBrush x:Name="line" Color="{StaticResource AccentColor}" />
+                            </Border.BorderBrush>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.12" />
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Color" To="#26FF5500" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="bg" Storyboard.TargetProperty="Color" To="#40FF5500" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="line" Storyboard.TargetProperty="Color" To="{StaticResource BorderColor}" Duration="0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource Muted}" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Text-only button (banner action, "show details") -->
+        <Style x:Key="TextButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Text}" />
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="3" Padding="8,5">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#1FFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Title bar caption buttons -->
+        <Style x:Key="CaptionButton" TargetType="Button">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Foreground" Value="{StaticResource Muted}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource Raised}" />
+                                <Setter Property="Foreground" Value="{StaticResource Text}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CloseButton" TargetType="Button" BasedOn="{StaticResource CaptionButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#C42B1C" />
+                                <Setter Property="Foreground" Value="{StaticResource Text}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Shield with a slash: FaceOff's own mark (24x24 viewbox) -->
+        <Geometry x:Key="ShieldGeometry">M12,2 L20,5 L20,11 C20,16.5 16.6,20.7 12,22 C7.4,20.7 4,16.5 4,11 L4,5 Z</Geometry>
+        <Geometry x:Key="SlashGeometry">M5.5,4.5 L18.5,19.5</Geometry>
+
+    </Application.Resources>
+</Application>

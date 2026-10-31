@@ -1,0 +1,164 @@
+<Window x:Class="FaceOff.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FaceOff"
+        Icon="Assets/FaceOff.ico"
+        Width="440" SizeToContent="Height"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Bg}"
+        Foreground="{StaticResource Text}"
+        FontFamily="{StaticResource UiFont}"
+        FontSize="13"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="40" ResizeBorderThickness="0" GlassFrameThickness="0,0,0,1"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                <Viewbox Width="18" Height="18">
+                    <Canvas Width="24" Height="24">
+                        <Path Data="{StaticResource ShieldGeometry}" Fill="{StaticResource Accent}" />
+                        <Path Data="{StaticResource SlashGeometry}" Stroke="{StaticResource Bg}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="FaceOff" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="13" Margin="10,0,0,0" VerticalAlignment="Center" />
+                <TextBlock x:Name="VersionText" Foreground="{StaticResource Muted}" FontSize="11" Margin="8,1,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource CaptionButton}" Click="Minimize_Click" ToolTip="Minimize"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Path Data="M0,0.5 L10,0.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1" />
+                </Button>
+                <Button Style="{StaticResource CloseButton}" Click="Close_Click" ToolTip="Close"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="20,8,20,18">
+
+            <!-- Restart banner (FACEIT-style info strip), only when a reboot is pending -->
+            <Border x:Name="RestartBanner" Background="{StaticResource Info}" CornerRadius="4" Padding="14,8,8,8"
+                    Margin="0,0,0,12" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Width="16" Height="16" VerticalAlignment="Center">
+                        <Ellipse Stroke="White" StrokeThickness="1.4" />
+                        <TextBlock Text="i" FontWeight="Bold" FontSize="11" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,1" />
+                    </Grid>
+                    <TextBlock x:Name="RestartText" Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center"
+                               TextWrapping="Wrap" FontSize="12" Foreground="White" />
+                    <Button x:Name="RestartButton" Grid.Column="2" Style="{StaticResource TextButton}"
+                            Content="RESTART NOW" Click="Restart_Click" />
+                </Grid>
+            </Border>
+
+            <!-- Status card -->
+            <Border Background="{StaticResource Surface}" CornerRadius="6" Padding="20,18">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Style="{StaticResource Label}" Text="ANTI-CHEAT STATUS" VerticalAlignment="Center" />
+                        <Border x:Name="Pill" HorizontalAlignment="Right" CornerRadius="10" Padding="9,3,10,3">
+                            <Border.Background>
+                                <SolidColorBrush x:Name="PillBg" Color="#26FF5500" />
+                            </Border.Background>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="7" Height="7" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <SolidColorBrush x:Name="PillDot" Color="{StaticResource AccentColor}" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock x:Name="PillText" Margin="6,0,0,0" FontSize="11" FontWeight="Bold" Text="…">
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush x:Name="PillFg" Color="{StaticResource AccentColor}" />
+                                    </TextBlock.Foreground>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock x:Name="Headline" Margin="0,14,0,0" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="26" FontWeight="Bold" Text="Checking…" />
+                    <TextBlock x:Name="Subline" Margin="0,4,0,0" Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+
+                    <Border Height="1" Background="{StaticResource Line}" Margin="0,18,0,14" />
+
+                    <ItemsControl x:Name="TargetRows">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}" FontSize="11"
+                                                   Foreground="{StaticResource Muted}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Ellipse Width="6" Height="6" Fill="{Binding DotBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding RunState}" Margin="6,0,0,0" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding StartText}" FontSize="11" Foreground="{StaticResource Muted}"
+                                                   HorizontalAlignment="Right" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Primary action -->
+            <Button x:Name="ToggleButton" Margin="0,14,0,0" Style="{StaticResource PrimaryButton}"
+                    Click="Toggle_Click" IsEnabled="False">
+                <StackPanel Orientation="Horizontal">
+                    <Path x:Name="Spinner" Width="16" Height="16" Margin="0,0,10,0" Visibility="Collapsed"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Data="M8,1 A7,7 0 1 1 1,8" RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform x:Name="SpinnerRotation" />
+                        </Path.RenderTransform>
+                    </Path>
+                    <TextBlock x:Name="ToggleText" Text="CHECKING" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <TextBlock x:Name="ErrorText" Margin="0,10,0,0" Foreground="{StaticResource Danger}" TextWrapping="Wrap"
+                       FontSize="12" Visibility="Collapsed" />
+
+            <!-- What exactly happened, for people who want to verify -->
+            <Button x:Name="DetailsButton" Style="{StaticResource TextButton}" Foreground="{StaticResource Muted}"
+                    HorizontalAlignment="Left" Margin="-8,10,0,0" Content="SHOW DETAILS" Click="Details_Click"
+                    Visibility="Collapsed" />
+            <Border x:Name="DetailsPanel" Background="{StaticResource Surface}" CornerRadius="4" Padding="12,10"
+                    Margin="0,4,0,0" Visibility="Collapsed">
+                <TextBlock x:Name="DetailsText" FontFamily="{StaticResource MonoFont}" FontSize="11"
+                           Foreground="{StaticResource Muted}" TextWrapping="Wrap" />
+            </Border>
+
+            <TextBlock Margin="0,16,0,0" HorizontalAlignment="Center" FontSize="11" Foreground="{StaticResource Muted}"
+                       Text="No network access  ·  Only changes service start types  ·  Open source" />
+        </StackPanel>
+    </Grid>
+</Window>
