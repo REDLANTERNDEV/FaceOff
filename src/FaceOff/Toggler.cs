@@ -52,7 +52,7 @@ namespace FaceOff
             Service = ServiceControl.Query(Targets.Service),
         };
 
-        public Result Disable()
+        public Result Disable(bool keepApp)
         {
             var result = new Result();
             var status = GetStatus();
@@ -64,14 +64,9 @@ namespace FaceOff
                 if (s.Installed) _store.Remember(s.Name, s.StartType);
             _store.Save();
 
-            // 2. Close the client first, otherwise it can restart the service.
-            foreach (var name in Targets.Processes)
-                foreach (var p in Process.GetProcessesByName(name))
-                    using (p)
-                    {
-                        try { p.Kill(); p.WaitForExit(5000); result.Log.Add($"Closed {name}.exe (PID {p.Id})"); }
-                        catch (Exception e) { result.Log.Add($"Could not close {name}.exe: {e.Message}"); }
-                    }
+            // 2. Close the anti-cheat client first, otherwise it can restart the service.
+            CloseProcesses(Targets.AntiCheatProcesses, result);
+            if (!keepApp) CloseProcesses(Targets.AppProcesses, result);
 
             // 3. Service before driver: the service depends on the driver being loaded.
             foreach (var s in new[] { status.Service, status.Driver })
@@ -121,6 +116,29 @@ namespace FaceOff
                     result.Log.Add($"{s.Name}: not started now, the FACEIT client will start it");
             }
             return result;
+        }
+
+        /// <summary>Asks each process to close like a normal Exit, and forces it only if it doesn't within 3 seconds.</summary>
+        static void CloseProcesses(string[] names, Result result)
+        {
+            foreach (var name in names)
+                foreach (var p in Process.GetProcessesByName(name))
+                    using (p)
+                    {
+                        try
+                        {
+                            int pid = p.Id;
+                            if (p.CloseMainWindow() && p.WaitForExit(3000))
+                                result.Log.Add($"Closed {name}.exe (PID {pid})");
+                            else
+                            {
+                                p.Kill();
+                                p.WaitForExit(5000);
+                                result.Log.Add($"Force-closed {name}.exe (PID {pid})");
+                            }
+                        }
+                        catch (Exception e) { result.Log.Add($"Could not close {name}.exe: {e.Message}"); }
+                    }
         }
 
         public static void Reboot()

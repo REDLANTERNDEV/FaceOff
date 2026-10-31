@@ -16,7 +16,13 @@ namespace FaceOff
         /// </summary>
         public const StartType FallbackStartType = StartType.Demand;
 
-        /// <summary>Process names (without .exe) closed before the services are stopped: the AC client and the FACEIT app.</summary>
-        public static readonly string[] Processes = { "faceitclient", "FACEIT" };
+        /// <summary>
+        /// Anti-cheat tray client (without .exe). Always closed before the services are stopped,
+        /// otherwise it can start them again. Same as choosing Exit in its tray menu.
+        /// </summary>
+        public static readonly string[] AntiCheatProcesses = { "faceitclient" };
+
+        /// <summary>The FACEIT app itself. Closed too unless the user keeps it; it doesn't block disabling the anti-cheat.</summary>
+        public static readonly string[] AppProcesses = { "FACEIT" };
     }
 }

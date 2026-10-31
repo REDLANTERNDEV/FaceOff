@@ -9,8 +9,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Closing FACEIT processes...
+echo Closing FACEIT (anti-cheat client and app)...
 taskkill /IM faceitclient.exe /F /T >nul 2>&1
+:: To keep the FACEIT app open, add "::" at the start of the next line.
 taskkill /IM FACEIT.exe /F /T >nul 2>&1
 
 echo Disabling FACEITService...

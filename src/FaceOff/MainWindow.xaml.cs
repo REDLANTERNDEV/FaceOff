@@ -12,7 +12,8 @@ namespace FaceOff
 {
     public partial class MainWindow : Window
     {
-        readonly Toggler _toggler = new Toggler(StateStore.Default());
+        readonly StateStore _store;
+        readonly Toggler _toggler;
         AntiCheatState _state;
         bool _restartArmed;
         readonly DispatcherTimer _disarmTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
@@ -20,7 +21,10 @@ namespace FaceOff
         public MainWindow()
         {
             InitializeComponent();
-            var v = Assembly.GetExecutingAssembly().GetName().Version;
+            _store = StateStore.Default();
+            _toggler = new Toggler(_store);
+            KeepAppCheck.IsChecked = _store.KeepApp;
+            var v =Assembly.GetExecutingAssembly().GetName().Version;
             VersionText.Text = $"v{v.Major}.{v.Minor}";
             _disarmTimer.Tick += (s, e) => DisarmRestart();
             SourceInitialized += (s, e) => ApplyDarkFrame();
@@ -64,6 +68,8 @@ namespace FaceOff
                     ToggleButton.IsEnabled = false;
                     break;
             }
+
+            KeepAppCheck.Visibility = _state == AntiCheatState.On ? Visibility.Visible : Visibility.Collapsed;
 
             TargetRows.ItemsSource = new[]
             {
@@ -121,11 +127,12 @@ namespace FaceOff
         async void Toggle_Click(object sender, RoutedEventArgs e)
         {
             bool turningOff = _state == AntiCheatState.On;
+            bool keepApp = KeepAppCheck.IsChecked == true;
             ErrorText.Visibility = Visibility.Collapsed;
             SetBusy(true, turningOff ? "TURNING OFF" : "TURNING ON");
             try
             {
-                var result = await Task.Run(() => turningOff ? _toggler.Disable() : _toggler.Enable());
+                var result = await Task.Run(() => turningOff ? _toggler.Disable(keepApp) : _toggler.Enable());
                 DetailsText.Text = string.Join(Environment.NewLine, result.Log);
                 DetailsButton.Visibility = Visibility.Visible;
 
@@ -188,6 +195,14 @@ namespace FaceOff
             _disarmTimer.Stop();
             _restartArmed = false;
             RestartButton.Content = "RESTART NOW";
+        }
+
+        void KeepApp_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_store == null) return; // fired during InitializeComponent
+            _store.KeepApp = KeepAppCheck.IsChecked == true;
+            try { _store.Save(); }
+            catch (Exception ex) { ShowError("Could not save setting: " + ex.Message); }
         }
 
         void Details_Click(object sender, RoutedEventArgs e)

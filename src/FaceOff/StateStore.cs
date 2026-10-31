@@ -20,8 +20,12 @@ namespace FaceOff
             foreach (var line in File.ReadAllLines(path))
             {
                 var parts = line.Split(new[] { '=' }, 2);
-                if (parts.Length == 2 && Enum.TryParse(parts[1].Trim(), true, out StartType value) && value != StartType.Disabled)
-                    _original[parts[0].Trim()] = value;
+                if (parts.Length != 2) continue;
+                string key = parts[0].Trim(), raw = parts[1].Trim();
+                if (key.Equals(KeepAppKey, StringComparison.OrdinalIgnoreCase))
+                    KeepApp = raw.Equals("true", StringComparison.OrdinalIgnoreCase);
+                else if (Enum.TryParse(raw, true, out StartType value) && value != StartType.Disabled)
+                    _original[key] = value;
             }
         }
 
@@ -40,10 +44,16 @@ namespace FaceOff
 
         public bool TryGet(string name, out StartType value) => _original.TryGetValue(name, out value);
 
+        const string KeepAppKey = "KeepApp";
+
+        /// <summary>Window setting: leave the FACEIT app running when turning off. Off by default.</summary>
+        public bool KeepApp { get; set; }
+
         public void Save()
         {
             var lines = new List<string> { "# FaceOff: original start types, restored by \"Turn on\"." };
             foreach (var kv in _original) lines.Add(kv.Key + "=" + kv.Value);
+            lines.Add(KeepAppKey + "=" + (KeepApp ? "true" : "false"));
             File.WriteAllLines(_path, lines);
         }
     }

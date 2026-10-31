@@ -48,6 +48,7 @@ namespace FaceOff
         {
             string command = args[0].ToLowerInvariant();
             bool reboot = Array.Exists(args, a => a.Equals("--reboot", StringComparison.OrdinalIgnoreCase));
+            bool keepApp = Array.Exists(args, a => a.Equals("--keep-app", StringComparison.OrdinalIgnoreCase));
 
             if (command == "--help" || command == "-h" || command == "/?")
             {
@@ -68,7 +69,7 @@ namespace FaceOff
                     PrintStatus(toggler.GetStatus());
                     return ExitOk;
                 case "--disable":
-                    result = toggler.Disable();
+                    result = toggler.Disable(keepApp);
                     break;
                 case "--enable":
                     result = toggler.Enable();
@@ -120,7 +121,9 @@ namespace FaceOff
             Console.WriteLine();
             Console.WriteLine("  FaceOff.exe                     open the window");
             Console.WriteLine("  FaceOff.exe --status            show driver and service state");
-            Console.WriteLine("  FaceOff.exe --disable [--reboot]  stop FACEIT and keep it from loading at boot");
+            Console.WriteLine("  FaceOff.exe --disable [--keep-app] [--reboot]");
+            Console.WriteLine("                                  close FACEIT, stop the anti-cheat, keep it from loading at boot");
+            Console.WriteLine("                                  --keep-app leaves the FACEIT app running");
             Console.WriteLine("  FaceOff.exe --enable  [--reboot]  restore FACEIT's original configuration");
             Console.WriteLine();
             Console.WriteLine("Exit codes: 0 ok, 1 error, 2 restart required.");

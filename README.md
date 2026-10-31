@@ -10,7 +10,7 @@ FACEIT's tray icon can unload the driver, but it [loads again on the next boot](
 
 ## What FaceOff does
 
-- **Turn off:** closes the FACEIT client, then sets the driver and service to `Disabled` and stops them. Windows usually won't unload the driver while it's running, so FaceOff tells you when a restart is needed.
+- **Turn off:** closes the anti-cheat tray client (same as **Exit** in its tray menu) and the FACEIT app, then sets the driver and service to `Disabled` and stops them. Windows usually won't unload the driver while it's running, so FaceOff tells you when a restart is needed. Tick **Keep the FACEIT app open** if you only want the anti-cheat off.
 - **Turn on:** restores the **exact** start types FACEIT had before (saved the first time you turn it off) and starts it again.
 - **Status:** shows whether the driver is loaded and how each one starts.
 
@@ -35,15 +35,15 @@ Command line (run from an elevated terminal):
 
 ```
 FaceOff.exe --status
-FaceOff.exe --disable [--reboot]
+FaceOff.exe --disable [--keep-app] [--reboot]
 FaceOff.exe --enable  [--reboot]
 ```
 
-Exit codes: `0` ok, `1` error, `2` restart required.
+`--keep-app` leaves the FACEIT app running. Exit codes: `0` ok, `1` error, `2` restart required.
 
 Typical routine: **Turn on → play → Turn off → restart.**
 
-FaceOff saves FACEIT's original start types in `FaceOff.state` next to the exe. Keep the file with the exe.
+FaceOff saves FACEIT's original start types and your settings in `FaceOff.state` next to the exe. Keep the file with the exe.
 
 ## Prefer no binary?
 
@@ -54,7 +54,7 @@ FaceOff saves FACEIT's original start types in `FaceOff.state` next to the exe. 
 | Step | Turn off | Turn on |
 |---|---|---|
 | 1 | Save the current start types | Restore the saved start type for `faceit` and start it |
-| 2 | Kill `faceitclient.exe`, `FACEIT.exe` | Restore the saved start type for `FACEITService` and start it |
+| 2 | Close `faceitclient.exe` and `FACEIT.exe` (unless you keep the app) | Restore the saved start type for `FACEITService` and start it |
 | 3 | `FACEITService` → Disabled, stop | |
 | 4 | `faceit` → Disabled, try to stop (restart if it won't) | |
 

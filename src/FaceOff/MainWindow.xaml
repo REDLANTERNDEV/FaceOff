@@ -144,6 +144,15 @@
                 </StackPanel>
             </Button>
 
+            <!-- Turning off closes everything FACEIT unless the user keeps the app -->
+            <CheckBox x:Name="KeepAppCheck" Style="{StaticResource Check}" Margin="2,12,0,0"
+                      Checked="KeepApp_Changed" Unchecked="KeepApp_Changed" Visibility="Collapsed">
+                <TextBlock>
+                    <Run Text="Keep the FACEIT app open" />
+                    <Run Text="  (anti-cheat still turns off)" Foreground="{StaticResource Muted}" />
+                </TextBlock>
+            </CheckBox>
+
             <TextBlock x:Name="ErrorText" Margin="0,10,0,0" Foreground="{StaticResource Danger}" TextWrapping="Wrap"
                        FontSize="12" Visibility="Collapsed" />
 
