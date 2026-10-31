@@ -24,6 +24,10 @@ namespace FaceOff
                 string key = parts[0].Trim(), raw = parts[1].Trim();
                 if (key.Equals(KeepAppKey, StringComparison.OrdinalIgnoreCase))
                     KeepApp = raw.Equals("true", StringComparison.OrdinalIgnoreCase);
+                else if (key.Equals(TurnedOffKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (long.TryParse(raw, out var ticks)) TurnedOffUtc = new DateTime(ticks, DateTimeKind.Utc);
+                }
                 else if (Enum.TryParse(raw, true, out StartType value) && value != StartType.Disabled)
                     _original[key] = value;
             }
@@ -49,11 +53,17 @@ namespace FaceOff
         /// <summary>Window setting: leave the FACEIT app running when turning off. Off by default.</summary>
         public bool KeepApp { get; set; }
 
+        const string TurnedOffKey = "TurnedOffUtc";
+
+        /// <summary>When Turn off last ran. Until Windows restarts after this, a clean restart is suggested.</summary>
+        public DateTime? TurnedOffUtc { get; set; }
+
         public void Save()
         {
             var lines = new List<string> { "# FaceOff: original start types, restored by \"Turn on\"." };
             foreach (var kv in _original) lines.Add(kv.Key + "=" + kv.Value);
             lines.Add(KeepAppKey + "=" + (KeepApp ? "true" : "false"));
+            if (TurnedOffUtc.HasValue) lines.Add(TurnedOffKey + "=" + TurnedOffUtc.Value.Ticks);
             File.WriteAllLines(_path, lines);
         }
     }

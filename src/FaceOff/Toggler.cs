@@ -46,7 +46,8 @@ namespace FaceOff
     /// <summary>The only place that changes anything. Shared by the window and the CLI.</summary>
     internal sealed class Toggler
     {
-        static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+        // Only the upper bound: waiting ends as soon as the service has stopped.
+        static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
         readonly StateStore _store;
 
         public Toggler(StateStore store) { _store = store; }
@@ -71,6 +72,7 @@ namespace FaceOff
                 _store.Remember(status.Driver.Name, status.Driver.StartType);
             if (status.Service.Installed)
                 _store.Remember(status.Service.Name, status.Service.StartType);
+            _store.TurnedOffUtc = DateTime.UtcNow;
             _store.Save();
 
             // 2. Close the anti-cheat client first, otherwise it can restart the service.
@@ -84,20 +86,25 @@ namespace FaceOff
                 ServiceControl.SetStartType(s.Name, StartType.Disabled);
                 result.Log.Add($"{s.Name}: start type -> Disabled");
 
-                if (ServiceControl.TryStop(s.Name, Timeout))
-                    result.Log.Add($"{s.Name}: stopped");
-                else
-                {
-                    result.Log.Add($"{s.Name}: still running, a restart will unload it");
-                    result.RebootRequired = true;
-                }
+                result.Log.Add(ServiceControl.TryStop(s.Name, Timeout)
+                    ? $"{s.Name}: stopped"
+                    : $"{s.Name}: didn't stop yet");
             }
+
+            // 4. Judge by what is actually loaded now, not by how each stop call went.
+            var after = GetStatus();
+            result.RebootRequired = after.Driver.Running || after.Service.Running;
+            result.Log.Add(result.RebootRequired
+                ? "Driver still loaded: restart Windows to unload it"
+                : "Driver unloaded. Restart anyway for a clean start");
             return result;
         }
 
         public Result Enable()
         {
             var result = new Result();
+            _store.TurnedOffUtc = null;
+            _store.Save();
             var status = GetStatus();
             if (status.State == AntiCheatState.NotInstalled)
                 throw new InvalidOperationException("FACEIT anti-cheat is not installed.");
@@ -148,6 +155,15 @@ namespace FaceOff
                         catch (Exception e) { result.Log.Add($"Could not close {name}.exe: {e.Message}"); }
                     }
         }
+
+        /// <summary>True if Turn off ran and Windows hasn't restarted since.</summary>
+        public bool CleanRestartPending =>
+            _store.TurnedOffUtc.HasValue && LastBootUtc < _store.TurnedOffUtc.Value;
+
+        static DateTime LastBootUtc => DateTime.UtcNow - TimeSpan.FromMilliseconds(GetTickCount64());
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern ulong GetTickCount64();
 
         public static void Reboot()
         {

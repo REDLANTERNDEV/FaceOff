@@ -76,8 +76,11 @@ namespace FaceOff
 
             // The banner follows the real driver state, so it's still there after reopening FaceOff.
             if (_state == AntiCheatState.OnAfterRestart) RestartText.Text = "Restart to play. FACEIT loads during startup.";
+            // After Turn off a restart is always offered: needed if the driver is still loaded, a clean start otherwise.
+            bool cleanRestart = _state == AntiCheatState.Off && _toggler.CleanRestartPending;
             if (_state == AntiCheatState.OffAfterRestart) RestartText.Text = "Restart to finish turning off.";
-            bool pendingRestart = _state == AntiCheatState.OnAfterRestart || _state == AntiCheatState.OffAfterRestart;
+            if (cleanRestart) RestartText.Text = "Off. Restart for a clean start.";
+            bool pendingRestart = _state == AntiCheatState.OnAfterRestart || _state == AntiCheatState.OffAfterRestart || cleanRestart;
             RestartBanner.Visibility = pendingRestart ? Visibility.Visible : Visibility.Collapsed;
         }
 
